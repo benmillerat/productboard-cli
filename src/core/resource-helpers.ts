@@ -74,12 +74,14 @@ export function parseOptionalJsonObject(
   return parseJsonObject(raw, optionName)
 }
 
-export function extractResource<T extends ResourceRecord>(response: ResourceResponse<T>): T {
+export function extractResource<T extends ResourceRecord>(
+  response: ResourceResponse<T>,
+): T | ResourceRecord {
   if (isRecord(response.data)) {
-    return response.data as T
+    return response.data
   }
 
-  return response as T
+  return response
 }
 
 export function resourceQuietId(resource: ResourceRecord, fallback?: string): string | undefined {

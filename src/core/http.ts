@@ -2,6 +2,7 @@ import { ApiError, mapHttpError } from './errors.js'
 
 export const PRODUCTBOARD_BASE_URL = 'https://api.productboard.com'
 export const PRODUCTBOARD_API_VERSION = '1'
+export const PRODUCTBOARD_API_VERSION_V2 = '2'
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 

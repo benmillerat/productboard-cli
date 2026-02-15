@@ -27,6 +27,10 @@ export interface RuntimeContext {
   client: HttpClient
 }
 
+export interface RuntimeOptions {
+  apiVersion?: string
+}
+
 function resolveOutputFlag(rawOutput: string | undefined, fallback: OutputFormat): OutputFormat {
   if (rawOutput && OUTPUT_FORMATS.includes(rawOutput as OutputFormat)) {
     return rawOutput as OutputFormat
@@ -36,13 +40,16 @@ function resolveOutputFlag(rawOutput: string | undefined, fallback: OutputFormat
 }
 
 export abstract class BaseCommand extends Command {
-  protected async initRuntime(flags: {
-    token?: string
-    profile?: string
-    output?: string
-    quiet?: boolean
-    'api-url'?: string
-  }): Promise<RuntimeContext> {
+  protected async initRuntime(
+    flags: {
+      token?: string
+      profile?: string
+      output?: string
+      quiet?: boolean
+      'api-url'?: string
+    },
+    options?: RuntimeOptions,
+  ): Promise<RuntimeContext> {
     const { profileName, profile, config } = await getProfileConfig(flags.profile)
     const token = await requireToken({
       flagToken: flags.token,
@@ -56,6 +63,7 @@ export abstract class BaseCommand extends Command {
     const client = new HttpClient({
       token,
       baseUrl: flags['api-url'] ?? profile.baseUrl,
+      apiVersion: options?.apiVersion,
       timeoutMs: config.defaults.timeoutMs,
       maxRetries: config.defaults.maxRetries,
     })

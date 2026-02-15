@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
 import { execute } from '@oclif/core'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
 
-await execute({ dir: import.meta.url })
+const currentDir = dirname(fileURLToPath(import.meta.url))
+const projectRoot = resolve(currentDir, '..')
+
+await execute({ dir: projectRoot })
