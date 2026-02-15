@@ -1,0 +1,60 @@
+{
+  "name": "@benmillerat/productboard-cli",
+  "version": "0.1.0",
+  "description": "Standalone Productboard CLI",
+  "license": "MIT",
+  "author": "Ben Miller",
+  "type": "module",
+  "bin": {
+    "pb": "./bin/run.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "dev": "./bin/dev.js",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "productboard",
+    "cli",
+    "oclif"
+  ],
+  "oclif": {
+    "bin": "pb",
+    "commands": "./dist/commands",
+    "dirname": "productboard-cli",
+    "topicSeparator": " "
+  },
+  "dependencies": {
+    "@oclif/core": "^4.8.0",
+    "cli-table3": "^0.6.5",
+    "keytar": "^7.9.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "nock": "^14.0.10",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
