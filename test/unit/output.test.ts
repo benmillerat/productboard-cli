@@ -1,8 +1,12 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { outputResult, serializeOutput } from '../../src/core/output.js'
 
 describe('core/output', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('serializes json output', () => {
     const payload = { id: 'fea_1', name: 'Alpha' }
     const output = serializeOutput(payload, 'json')
@@ -24,13 +28,13 @@ describe('core/output', () => {
   })
 
   it('supports quiet output inference', () => {
-    const logger = vi.fn<(message: string) => void>()
+    const writeSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
-    outputResult(logger, [{ id: 'fea_1' }, { id: 'fea_2' }], {
+    outputResult(() => {}, [{ id: 'fea_1' }, { id: 'fea_2' }], {
       format: 'json',
       quiet: true,
     })
 
-    expect(logger).toHaveBeenCalledWith('fea_1\nfea_2')
+    expect(writeSpy).toHaveBeenCalledWith('fea_1\nfea_2\n')
   })
 })

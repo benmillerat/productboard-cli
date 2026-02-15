@@ -39,7 +39,7 @@ describe('releases create command integration', () => {
         },
       })
 
-    const logSpy = vi.spyOn(ReleasesCreate.prototype, 'log').mockImplementation(() => undefined)
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await ReleasesCreate.run([
       '--api-url',
@@ -50,8 +50,8 @@ describe('releases create command integration', () => {
       '{"data":{"name":"Q4 rollout"}}',
     ])
 
-    expect(logSpy).toHaveBeenCalledTimes(1)
-    const output = logSpy.mock.calls[0]?.[0]
+    expect(stdoutSpy).toHaveBeenCalled()
+    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {

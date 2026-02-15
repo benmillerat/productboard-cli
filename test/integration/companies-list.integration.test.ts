@@ -46,12 +46,12 @@ describe('companies list command integration', () => {
         data: [{ id: 'com_3', name: 'Initech' }],
       })
 
-    const logSpy = vi.spyOn(CompaniesList.prototype, 'log').mockImplementation(() => undefined)
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await CompaniesList.run(['--api-url', apiBaseUrl, '--output', 'json', '--limit', '3'])
 
-    expect(logSpy).toHaveBeenCalledTimes(1)
-    const output = logSpy.mock.calls[0]?.[0]
+    expect(stdoutSpy).toHaveBeenCalled()
+    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {

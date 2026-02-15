@@ -35,12 +35,12 @@ describe('notes get command integration', () => {
         },
       })
 
-    const logSpy = vi.spyOn(NotesGet.prototype, 'log').mockImplementation(() => undefined)
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await NotesGet.run(['note_123', '--api-url', apiBaseUrl, '--output', 'json'])
 
-    expect(logSpy).toHaveBeenCalledTimes(1)
-    const output = logSpy.mock.calls[0]?.[0]
+    expect(stdoutSpy).toHaveBeenCalled()
+    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {
@@ -61,11 +61,12 @@ describe('notes get command integration', () => {
       },
     })
 
-    const logSpy = vi.spyOn(NotesGet.prototype, 'log').mockImplementation(() => undefined)
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await NotesGet.run(['note_456', '--api-url', apiBaseUrl, '--quiet'])
 
-    expect(logSpy).toHaveBeenCalledTimes(1)
-    expect(logSpy).toHaveBeenCalledWith('note_456')
+    expect(stdoutSpy).toHaveBeenCalled()
+    const quietOutput = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    expect(quietOutput.trim()).toBe('note_456')
   })
 })

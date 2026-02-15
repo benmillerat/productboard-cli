@@ -140,8 +140,15 @@ export function serializeOutput(data: unknown, format: OutputFormat): string {
   }
 }
 
+/**
+ * Write formatted output to stdout.
+ *
+ * The first parameter (`_log`) is accepted for API compatibility but ignored.
+ * Output is written via `process.stdout.write` to avoid oclif `this`-binding
+ * issues when `this.log` is passed as an unbound callback.
+ */
 export function outputResult<TData>(
-  log: (message: string) => void,
+  _log: (message: string) => void,
   data: TData,
   options: OutputOptions<TData>,
 ): void {
@@ -155,11 +162,11 @@ export function outputResult<TData>(
       : inferQuietValue(data)
 
     if (values.length > 0) {
-      log(values.join('\n'))
+      process.stdout.write(values.join('\n') + '\n')
     }
 
     return
   }
 
-  log(serializeOutput(data, options.format))
+  process.stdout.write(serializeOutput(data, options.format) + '\n')
 }

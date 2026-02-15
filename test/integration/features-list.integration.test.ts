@@ -46,12 +46,12 @@ describe('features list command integration', () => {
         data: [{ id: 'fea_3', name: 'Gamma', status: { name: 'Planned' } }],
       })
 
-    const logSpy = vi.spyOn(FeaturesList.prototype, 'log').mockImplementation(() => undefined)
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await FeaturesList.run(['--api-url', apiBaseUrl, '--output', 'json', '--limit', '3'])
 
-    expect(logSpy).toHaveBeenCalledTimes(1)
-    const output = logSpy.mock.calls[0]?.[0]
+    expect(stdoutSpy).toHaveBeenCalled()
+    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {
