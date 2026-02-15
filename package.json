@@ -1,12 +1,12 @@
 {
   "name": "@benmillerat/productboard-cli",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Standalone Productboard CLI",
   "license": "MIT",
   "author": "Ben Miller",
   "type": "module",
   "bin": {
-    "pb": "./bin/run.js"
+    "pb": "bin/run.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
