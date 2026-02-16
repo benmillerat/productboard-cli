@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { releaseGroupsPresenter } from '../../core/presenters/release-groups.js'
 import { extractResource, resourceQuietId } from '../../core/resource-helpers.js'
 import type { ResourceRecord, ResourceResponse } from '../../core/resource-helpers.js'
 
@@ -27,7 +28,7 @@ export default class ReleaseGroupsGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.id),
-      resource: 'release-groups',
+      presenter: releaseGroupsPresenter,
       wide: runtime.wide,
       resultsOnly: runtime.resultsOnly,
     })

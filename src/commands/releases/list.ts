@@ -2,6 +2,7 @@ import { Flags } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { releasesPresenter } from '../../core/presenters/releases.js'
 import { listResources, parseKeyValuePairs } from '../../core/resource-helpers.js'
 import type { ResourceRecord } from '../../core/resource-helpers.js'
 
@@ -52,7 +53,7 @@ export default class ReleasesList extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: quietIds,
-      resource: 'releases',
+      presenter: releasesPresenter,
       wide: runtime.wide,
       resultsOnly: runtime.resultsOnly,
     })
