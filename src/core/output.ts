@@ -100,6 +100,11 @@ function serializeNdjson(data: unknown): string {
     return data.map((item) => JSON.stringify(item)).join('\n')
   }
 
+  // For list envelopes ({data: [...], count, hasMore, next}), emit one item per line
+  if (isPlainObject(data) && Array.isArray(data.data)) {
+    return (data.data as unknown[]).map((item) => JSON.stringify(item)).join('\n')
+  }
+
   return JSON.stringify(data)
 }
 

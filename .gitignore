@@ -5,3 +5,16 @@ coverage/
 .DS_Store
 *.log
 .env
+
+# Woz analysis temp files
+.tmp-gog-analysis/
+.tmp-review/
+
+# Research/planning docs (not shipped)
+GOG-ANALYSIS.md
+CLI-BEST-PRACTICES-RESEARCH.md
+V2-DEV-PLAN.md
+V2-PHASE1-PLAN.md
+V2-PHASE1-REVIEW.md
+gog-*.txt
+gog-*.md
