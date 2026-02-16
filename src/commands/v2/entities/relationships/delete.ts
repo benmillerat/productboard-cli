@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { commonFlags } from '../../../../core/base-command.js'
 import { outputResult } from '../../../../core/output.js'
+import { confirmOrThrow } from '../../../../core/confirm.js'
 import { V2BaseCommand } from '../../../../core/v2-base-command.js'
 
 export default class V2EntitiesRelationshipsDelete extends V2BaseCommand {
@@ -22,6 +23,12 @@ export default class V2EntitiesRelationshipsDelete extends V2BaseCommand {
     const runtime = await this.initRuntime(flags)
 
     const endpoint = `/v2/entities/${encodeURIComponent(args.id)}/relationships/${encodeURIComponent(args.type)}/${encodeURIComponent(args.targetId)}`
+
+    await confirmOrThrow({
+      yes: runtime.yes,
+      noInput: runtime.noInput,
+      prompt: `Delete v2 entity relationship ${args.type}/${args.targetId} from entity ${args.id}?`,
+    })
     await runtime.client.delete(endpoint)
 
     outputResult(

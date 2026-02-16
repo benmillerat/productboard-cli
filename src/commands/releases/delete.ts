@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { confirmOrThrow } from '../../core/confirm.js'
 
 export default class ReleasesDelete extends BaseCommand {
   public static override description = 'Delete a Productboard release'
@@ -18,6 +19,12 @@ export default class ReleasesDelete extends BaseCommand {
     const runtime = await this.initRuntime(flags)
 
     const endpoint = `/releases/${encodeURIComponent(args.id)}`
+
+    await confirmOrThrow({
+      yes: runtime.yes,
+      noInput: runtime.noInput,
+      prompt: `Delete release ${args.id}?`,
+    })
     await runtime.client.delete(endpoint)
 
     outputResult(

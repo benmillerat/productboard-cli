@@ -65,4 +65,37 @@ describe('features list command integration', () => {
     expect(payload.data.map((item) => item.id)).toEqual(['fea_1', 'fea_2', 'fea_3'])
     expect(nock.isDone()).toBe(true)
   })
+
+  it('writes debug HTTP logs to stderr when --debug is enabled', async () => {
+    nock(apiBaseUrl)
+      .get('/features')
+      .matchHeader('authorization', 'Bearer test-token')
+      .reply(200, {
+        data: [{ id: 'fea_1', name: 'Alpha', status: { name: 'Planned' } }],
+      }, {
+        'x-request-id': 'req_debug_123',
+      })
+
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+
+    await FeaturesList.run([
+      '--api-url',
+      apiBaseUrl,
+      '--output',
+      'json',
+      '--limit',
+      '1',
+      '--debug',
+    ])
+
+    const debugOutput = stderrSpy.mock.calls.map((call) => String(call[0])).join('')
+
+    expect(stdoutSpy).toHaveBeenCalled()
+    expect(debugOutput).toContain('→ GET /features')
+    expect(debugOutput).toContain('← 200')
+    expect(debugOutput).toContain('[req-id: req_debug_123]')
+    expect(debugOutput).not.toContain('test-token')
+    expect(nock.isDone()).toBe(true)
+  })
 })

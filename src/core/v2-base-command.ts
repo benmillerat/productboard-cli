@@ -10,6 +10,8 @@ export abstract class V2BaseCommand extends BaseCommand {
     plain?: boolean
     quiet?: boolean
     wide?: boolean
+    yes?: boolean
+    'no-input'?: boolean
     debug?: boolean
     'results-only'?: boolean
     'api-url'?: string

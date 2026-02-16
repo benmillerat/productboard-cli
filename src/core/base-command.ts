@@ -8,6 +8,15 @@ import { OUTPUT_FORMATS, outputFlags, type OutputFormat } from './output.js'
 
 export const commonFlags = {
   ...outputFlags,
+  yes: Flags.boolean({
+    char: 'y',
+    description: 'Skip confirmation prompts',
+    default: false,
+  }),
+  'no-input': Flags.boolean({
+    description: 'Never prompt; fail if confirmation needed (for CI/scripting)',
+    default: false,
+  }),
   debug: Flags.boolean({
     description: 'Enable debug output (HTTP details on stderr)',
     default: false,
@@ -31,6 +40,8 @@ export interface RuntimeContext {
   wide: boolean
   resultsOnly: boolean
   debug: boolean
+  yes: boolean
+  noInput: boolean
   client: HttpClient
 }
 
@@ -81,6 +92,8 @@ export abstract class BaseCommand extends Command {
       plain?: boolean
       quiet?: boolean
       wide?: boolean
+      yes?: boolean
+      'no-input'?: boolean
       debug?: boolean
       'results-only'?: boolean
       'api-url'?: string
@@ -97,6 +110,8 @@ export abstract class BaseCommand extends Command {
     const { output, resultsOnly } = resolveRequestedOutput(flags, profile.defaultOutput ?? config.defaults.output)
     const quiet = flags.quiet ?? config.defaults.quiet
     const wide = flags.wide ?? false
+    const yes = flags.yes ?? false
+    const noInput = flags['no-input'] ?? false
     const debug = flags.debug ?? false
 
     const client = new HttpClient({
@@ -105,6 +120,7 @@ export abstract class BaseCommand extends Command {
       apiVersion: options?.apiVersion,
       timeoutMs: config.defaults.timeoutMs,
       maxRetries: config.defaults.maxRetries,
+      debug,
     })
 
     return {
@@ -114,6 +130,8 @@ export abstract class BaseCommand extends Command {
       wide,
       resultsOnly,
       debug,
+      yes,
+      noInput,
       client,
     }
   }
@@ -124,6 +142,8 @@ export abstract class BaseCommand extends Command {
     plain?: boolean
     quiet?: boolean
     wide?: boolean
+    yes?: boolean
+    'no-input'?: boolean
     debug?: boolean
     'results-only'?: boolean
   }): Promise<{
@@ -131,6 +151,8 @@ export abstract class BaseCommand extends Command {
     output: OutputFormat
     quiet: boolean
     wide: boolean
+    yes: boolean
+    noInput: boolean
     debug: boolean
     resultsOnly: boolean
   }> {
@@ -142,6 +164,8 @@ export abstract class BaseCommand extends Command {
       output,
       quiet: flags.quiet ?? config.defaults.quiet,
       wide: flags.wide ?? false,
+      yes: flags.yes ?? false,
+      noInput: flags['no-input'] ?? false,
       debug: flags.debug ?? false,
       resultsOnly,
     }

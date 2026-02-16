@@ -3,6 +3,7 @@ import { Flags } from '@oclif/core'
 import { BaseCommand, commonFlags } from '../../../core/base-command.js'
 import { ValidationError } from '../../../core/errors.js'
 import { outputResult } from '../../../core/output.js'
+import { confirmOrThrow } from '../../../core/confirm.js'
 import { parseKeyValuePairs } from '../../../core/resource-helpers.js'
 
 export default class CustomFieldsValuesDelete extends BaseCommand {
@@ -25,6 +26,11 @@ export default class CustomFieldsValuesDelete extends BaseCommand {
       throw new ValidationError('At least one --query key=value must be provided.')
     }
 
+    await confirmOrThrow({
+      yes: runtime.yes,
+      noInput: runtime.noInput,
+      prompt: `Delete custom field value matching ${Object.entries(query).map(([key, value]) => `${key}=${value}`).join(', ')}?`,
+    })
     await runtime.client.delete('/hierarchy-entities/custom-fields-values/value', { query })
 
     outputResult(

@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { confirmOrThrow } from '../../core/confirm.js'
 
 export default class CompaniesDelete extends BaseCommand {
   public static override description = 'Delete a Productboard company'
@@ -18,6 +19,12 @@ export default class CompaniesDelete extends BaseCommand {
     const runtime = await this.initRuntime(flags)
 
     const endpoint = `/companies/${encodeURIComponent(args.id)}`
+
+    await confirmOrThrow({
+      yes: runtime.yes,
+      noInput: runtime.noInput,
+      prompt: `Delete company ${args.id}?`,
+    })
     await runtime.client.delete(endpoint)
 
     outputResult(

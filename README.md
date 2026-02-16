@@ -7,7 +7,7 @@ It is designed for fast day-to-day API workflows, scripting, and automation, wit
 ## Why this project
 
 - First open-source Productboard-focused CLI with broad API coverage
-- Script-friendly output (`json`, `yaml`, `ndjson`, `quiet`)
+- Script-friendly output (`plain`, `json`, `yaml`, `ndjson`, `quiet`, `--results-only`)
 - Profile-aware authentication via OS keychain + env/flag overrides
 - Consistent command patterns across resources
 
@@ -82,25 +82,71 @@ Auth commands:
 
 Global output flags available on commands:
 
-- `--output table|json|yaml|ndjson`
+- `--output table|plain|json|yaml|ndjson`
+- `--plain` (shorthand for `--output plain`)
+- `--results-only` (JSON mode only)
+- `--wide` (extra columns in table/plain)
 - `--quiet`
+- `--debug` (HTTP request/response logs to stderr)
 
 Behavior:
 
-- `table` (default): human-friendly output
-- `json`: pretty JSON
+- `table` (default): clean aligned text table for humans
+- `plain`: tab-separated output for scripts (TSV)
+- `json`: pretty JSON (full API envelope by default)
 - `yaml`: YAML output
 - `ndjson`: one JSON object per line (arrays emit multiple lines)
+- `--results-only`: with `--output json`, emit only primary payload (for example just `data[]`)
+- `--wide`: show additional columns (for example parent IDs/URLs)
 - `--quiet`: emit compact IDs/scalars when possible
+- `--debug`: print `→ METHOD /path` and `← status (ms)` lines to stderr
+
+Example human table output:
+
+```text
+ID                                    NAME               TYPE        STATUS   OWNER               UPDATED
+02a68d50-9a53-4999-824c-92cac04f3518  Sample subfeature  subfeature  Planned  tech@benpro.at      2026-02-13 12:37
+```
+
+Example plain output (`--plain` / TSV):
+
+```text
+ID\tNAME\tTYPE\tSTATUS\tOWNER\tUPDATED
+02a68d50-9a53-4999-824c-92cac04f3518\tSample subfeature\tsubfeature\tPlanned\ttech@benpro.at\t2026-02-13 12:37
+```
 
 Examples:
 
 ```bash
 pb companies list --output table
+pb companies list --plain
 pb companies list --output json
+pb companies list --output json --results-only
+pb companies list --wide
 pb companies list --output yaml
 pb companies list --output ndjson
 pb companies get com_123 --quiet
+pb features list --debug --limit 3
+```
+
+## Destructive command confirmations
+
+Delete commands now require confirmation by default.
+
+- Interactive terminal (TTY): prompts with `Delete <resource> <id>? [y/N]`
+- Non-interactive (CI/script): command exits with code `2` unless `--yes` is provided
+
+Related flags:
+
+- `--yes`, `-y`: skip confirmation prompts
+- `--no-input`: never prompt; fail when confirmation would be required
+
+Examples:
+
+```bash
+pb features delete fea_123
+pb features delete fea_123 --yes
+pb features delete fea_123 --no-input --yes
 ```
 
 ## Configuration
@@ -186,6 +232,7 @@ pb api call PATCH /features/fea_123 --body '{"data":{"name":"New name"}}'
 - `pb auth logout`
 - `pb auth status`
 - `pb auth whoami`
+- `pb help exit-codes`
 
 ### Companies
 
@@ -439,6 +486,19 @@ PM entities:
 Analytics:
 
 - `pb v2 analytics member-activities get`
+
+## Exit codes
+
+You can also run `pb help exit-codes` for this table.
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Runtime/API/network error |
+| 2 | Usage/validation/config error (includes missing confirmation) |
+| 4 | Auth required or invalid |
+| 5 | Resource not found (404) |
+| 130 | Interrupted (Ctrl+C) |
 
 ## Development and contributing
 

@@ -12,6 +12,7 @@ export interface HttpClientOptions {
   apiVersion?: string
   timeoutMs?: number
   maxRetries?: number
+  debug?: boolean
 }
 
 export interface RequestOptions {
@@ -70,6 +71,7 @@ export class HttpClient {
   private readonly apiVersion: string
   private readonly timeoutMs: number
   private readonly maxRetries: number
+  private readonly debug: boolean
 
   public constructor(options: HttpClientOptions) {
     this.token = options.token
@@ -77,6 +79,31 @@ export class HttpClient {
     this.apiVersion = options.apiVersion ?? PRODUCTBOARD_API_VERSION
     this.timeoutMs = options.timeoutMs ?? 30_000
     this.maxRetries = options.maxRetries ?? 3
+    this.debug = options.debug ?? false
+  }
+
+  private logDebugRequest(method: HttpMethod, url: URL): void {
+    if (!this.debug) {
+      return
+    }
+
+    const query = url.searchParams.toString()
+    const querySegment = query.length > 0 ? ` (query: ${query})` : ''
+    process.stderr.write(`→ ${method} ${url.pathname}${querySegment}\n`)
+  }
+
+  private logDebugResponse(response: Response, durationMs: number): void {
+    if (!this.debug) {
+      return
+    }
+
+    const statusText = response.statusText.trim().length > 0 ? response.statusText : 'Unknown'
+    const requestId = response.headers.get('x-request-id')
+    const requestIdSegment = requestId ? ` [req-id: ${requestId}]` : ''
+
+    process.stderr.write(
+      `← ${response.status} ${statusText} (${durationMs}ms)${requestIdSegment}\n`,
+    )
   }
 
   public async get<TResponse>(
@@ -143,6 +170,9 @@ export class HttpClient {
     for (let attempt = 0; attempt <= this.maxRetries; attempt += 1) {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), this.timeoutMs)
+      const startedAt = Date.now()
+
+      this.logDebugRequest(method, url)
 
       try {
         const response = await fetch(url, {
@@ -153,6 +183,9 @@ export class HttpClient {
         })
 
         clearTimeout(timeout)
+
+        const durationMs = Date.now() - startedAt
+        this.logDebugResponse(response, durationMs)
 
         const rawText = await response.text()
         let payload: unknown

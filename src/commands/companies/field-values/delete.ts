@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../../core/base-command.js'
 import { outputResult } from '../../../core/output.js'
+import { confirmOrThrow } from '../../../core/confirm.js'
 
 export default class CompaniesFieldValuesDelete extends BaseCommand {
   public static override description = 'Delete a Productboard company field value'
@@ -20,6 +21,12 @@ export default class CompaniesFieldValuesDelete extends BaseCommand {
     const runtime = await this.initRuntime(flags)
 
     const endpoint = `/companies/${encodeURIComponent(args.companyId)}/custom-fields/${encodeURIComponent(args.companyCustomFieldId)}/value`
+
+    await confirmOrThrow({
+      yes: runtime.yes,
+      noInput: runtime.noInput,
+      prompt: `Delete company field value ${args.companyCustomFieldId} for company ${args.companyId}?`,
+    })
     await runtime.client.delete(endpoint)
 
     outputResult(
