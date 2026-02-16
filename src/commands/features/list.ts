@@ -3,6 +3,7 @@ import { Flags } from '@oclif/core'
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { ValidationError } from '../../core/errors.js'
 import { outputResult } from '../../core/output.js'
+import { featuresPresenter } from '../../core/presenters/features.js'
 
 interface Feature {
   id: string
@@ -136,16 +137,13 @@ export default class FeaturesList extends BaseCommand {
       next: nextUrl,
     }
 
-    const tableData = items.map((feature) => ({
-      id: feature.id,
-      name: feature.name ?? '',
-      status: feature.status?.name ?? '',
-    }))
-
-    outputResult(this.log, runtime.output === 'table' ? tableData : payload, {
+    outputResult(this.log, payload, {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: items.map((feature) => feature.id),
+      presenter: featuresPresenter,
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

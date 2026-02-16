@@ -37,7 +37,13 @@ const DEFAULT_CONFIG: CliConfig = {
 }
 
 function isOutputFormat(value: unknown): value is OutputFormat {
-  return value === 'table' || value === 'json' || value === 'yaml' || value === 'ndjson'
+  return (
+    value === 'table' ||
+    value === 'plain' ||
+    value === 'json' ||
+    value === 'yaml' ||
+    value === 'ndjson'
+  )
 }
 
 function mergeWithDefaults(raw: unknown): CliConfig {

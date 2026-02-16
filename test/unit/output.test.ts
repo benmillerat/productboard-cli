@@ -1,6 +1,20 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { outputResult, serializeOutput } from '../../src/core/output.js'
+import type { Presenter } from '../../src/core/presenter.js'
+
+const testPresenter: Presenter = {
+  resource: 'features',
+  primaryPath: 'data',
+  listColumns: [
+    { header: 'ID', accessor: 'id' },
+    { header: 'NAME', accessor: 'name', maxWidth: 5 },
+  ],
+  detailFields: [
+    { label: 'id', accessor: 'id' },
+    { label: 'name', accessor: 'name' },
+  ],
+}
 
 describe('core/output', () => {
   afterEach(() => {
@@ -14,17 +28,50 @@ describe('core/output', () => {
     expect(output).toContain('"id": "fea_1"')
   })
 
-  it('renders table output for arrays', () => {
+  it('renders presenter table output without box borders', () => {
     const output = serializeOutput(
-      [
-        { id: 'fea_1', name: 'Alpha' },
-        { id: 'fea_2', name: 'Beta' },
-      ],
+      {
+        data: [{ id: 'fea_1', name: 'Alphabet' }],
+      },
       'table',
+      { presenter: testPresenter },
     )
 
-    expect(output).toContain('fea_1')
-    expect(output).toContain('Alpha')
+    expect(output).toContain('ID')
+    expect(output).toContain('NAME')
+    expect(output).toContain('Alph…')
+    expect(output).not.toContain('┌')
+  })
+
+  it('renders plain output as TSV without truncation', () => {
+    const output = serializeOutput(
+      {
+        data: [{ id: 'fea_1', name: 'Alphabet' }],
+      },
+      'plain',
+      { presenter: testPresenter },
+    )
+
+    const lines = output.split('\n')
+    expect(lines[0]).toBe('ID\tNAME')
+    expect(lines[1]).toBe('fea_1\tAlphabet')
+  })
+
+  it('extracts primary data for --results-only json output', () => {
+    const output = serializeOutput(
+      {
+        data: [{ id: 'fea_1' }],
+        count: 1,
+        hasMore: false,
+      },
+      'json',
+      {
+        presenter: testPresenter,
+        resultsOnly: true,
+      },
+    )
+
+    expect(output.trim()).toBe('[\n  {\n    "id": "fea_1"\n  }\n]')
   })
 
   it('supports quiet output inference', () => {

@@ -69,7 +69,7 @@ function extractMessage(payload: unknown): string | undefined {
   const errors = record.errors
   if (Array.isArray(errors) && errors.length > 0) {
     const first = errors[0]
-    if (typeof first === 'string') {
+    if (typeof first === 'string' && first.trim().length > 0) {
       return first
     }
 
@@ -91,14 +91,16 @@ function extractMessage(payload: unknown): string | undefined {
 }
 
 export function mapHttpError(status: number, payload: unknown, rawText?: string): ApiError {
-  const fallback = extractMessage(payload) ?? rawText ?? `Productboard API returned HTTP ${status}.`
+  const rawMessage =
+    typeof rawText === 'string' && rawText.trim().length > 0 ? rawText.trim() : undefined
+  const fallback = extractMessage(payload) ?? rawMessage ?? `Productboard API returned HTTP ${status}.`
 
   const defaultMessageByStatus: Record<number, string> = {
-    401: 'Authentication failed. Check your Productboard API token.',
-    403: 'Access denied by Productboard API. Verify token permissions.',
-    404: 'Requested Productboard resource was not found.',
-    422: 'Productboard rejected the request payload. Check field values and try again.',
-    429: 'Productboard API rate limit reached. Please retry shortly.',
+    401: 'Authentication failed. Check your Productboard API token. (HTTP 401)',
+    403: 'Access denied by Productboard API. Verify token permissions. (HTTP 403)',
+    404: 'Requested Productboard resource was not found. (HTTP 404)',
+    422: 'Productboard rejected the request payload. Check field values and try again. (HTTP 422)',
+    429: 'Productboard API rate limit reached. Please retry shortly. (HTTP 429)',
   }
 
   const retryAfter =

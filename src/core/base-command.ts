@@ -2,12 +2,16 @@ import { Command, Flags } from '@oclif/core'
 
 import { requireToken } from './auth.js'
 import { getProfileConfig } from './config.js'
-import { CliError } from './errors.js'
+import { CliError, ValidationError } from './errors.js'
 import { HttpClient } from './http.js'
 import { OUTPUT_FORMATS, outputFlags, type OutputFormat } from './output.js'
 
 export const commonFlags = {
   ...outputFlags,
+  debug: Flags.boolean({
+    description: 'Enable debug output (HTTP details on stderr)',
+    default: false,
+  }),
   token: Flags.string({
     description: 'Productboard API token (overrides env and keychain)',
   }),
@@ -24,11 +28,20 @@ export interface RuntimeContext {
   profileName: string
   output: OutputFormat
   quiet: boolean
+  wide: boolean
+  resultsOnly: boolean
+  debug: boolean
   client: HttpClient
 }
 
 export interface RuntimeOptions {
   apiVersion?: string
+}
+
+interface OutputFlagValues {
+  output?: string
+  plain?: boolean
+  'results-only'?: boolean
 }
 
 function resolveOutputFlag(rawOutput: string | undefined, fallback: OutputFormat): OutputFormat {
@@ -39,13 +52,37 @@ function resolveOutputFlag(rawOutput: string | undefined, fallback: OutputFormat
   return fallback
 }
 
+function resolveRequestedOutput(
+  flags: OutputFlagValues,
+  fallback: OutputFormat,
+): { output: OutputFormat; resultsOnly: boolean } {
+  const explicitOutput = resolveOutputFlag(flags.output, fallback)
+
+  if (flags.plain && flags.output && flags.output !== 'plain') {
+    throw new ValidationError('Cannot combine --plain with --output values other than "plain".')
+  }
+
+  const output = flags.plain ? 'plain' : explicitOutput
+  const resultsOnly = flags['results-only'] ?? false
+
+  if (resultsOnly && output !== 'json') {
+    throw new ValidationError('--results-only can only be used with --output json.')
+  }
+
+  return { output, resultsOnly }
+}
+
 export abstract class BaseCommand extends Command {
   protected async initRuntime(
     flags: {
       token?: string
       profile?: string
       output?: string
+      plain?: boolean
       quiet?: boolean
+      wide?: boolean
+      debug?: boolean
+      'results-only'?: boolean
       'api-url'?: string
     },
     options?: RuntimeOptions,
@@ -57,8 +94,10 @@ export abstract class BaseCommand extends Command {
       profile: profileName,
     })
 
-    const output = resolveOutputFlag(flags.output, profile.defaultOutput ?? config.defaults.output)
+    const { output, resultsOnly } = resolveRequestedOutput(flags, profile.defaultOutput ?? config.defaults.output)
     const quiet = flags.quiet ?? config.defaults.quiet
+    const wide = flags.wide ?? false
+    const debug = flags.debug ?? false
 
     const client = new HttpClient({
       token,
@@ -72,6 +111,9 @@ export abstract class BaseCommand extends Command {
       profileName,
       output,
       quiet,
+      wide,
+      resultsOnly,
+      debug,
       client,
     }
   }
@@ -79,14 +121,29 @@ export abstract class BaseCommand extends Command {
   protected async initOutput(flags: {
     profile?: string
     output?: string
+    plain?: boolean
     quiet?: boolean
-  }): Promise<{ profileName: string; output: OutputFormat; quiet: boolean }> {
+    wide?: boolean
+    debug?: boolean
+    'results-only'?: boolean
+  }): Promise<{
+    profileName: string
+    output: OutputFormat
+    quiet: boolean
+    wide: boolean
+    debug: boolean
+    resultsOnly: boolean
+  }> {
     const { profileName, profile, config } = await getProfileConfig(flags.profile)
+    const { output, resultsOnly } = resolveRequestedOutput(flags, profile.defaultOutput ?? config.defaults.output)
 
     return {
       profileName,
-      output: resolveOutputFlag(flags.output, profile.defaultOutput ?? config.defaults.output),
+      output,
       quiet: flags.quiet ?? config.defaults.quiet,
+      wide: flags.wide ?? false,
+      debug: flags.debug ?? false,
+      resultsOnly,
     }
   }
 

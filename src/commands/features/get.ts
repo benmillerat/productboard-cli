@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { featuresPresenter } from '../../core/presenters/features.js'
 
 interface Feature {
   id: string
@@ -36,6 +37,9 @@ export default class FeaturesGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: feature.id ?? args.id,
+      presenter: featuresPresenter,
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

@@ -1,11 +1,28 @@
 import { Flags } from '@oclif/core'
-import Table from 'cli-table3'
 import { stringify as yamlStringify } from 'yaml'
 
-export const OUTPUT_FORMATS = ['table', 'json', 'yaml', 'ndjson'] as const
+import { createGenericPresenter } from './presenters/generic.js'
+import {
+  formatDisplayValue,
+  nullPlaceholder,
+  projectDetailFields,
+  projectListRows,
+  resolveDotPath,
+  truncate,
+  type Presenter,
+} from './presenter.js'
+
+export const OUTPUT_FORMATS = ['table', 'plain', 'json', 'yaml', 'ndjson'] as const
 export type OutputFormat = (typeof OUTPUT_FORMATS)[number]
 
-export interface OutputOptions<TData = unknown> {
+export interface RenderOptions {
+  presenter?: Presenter
+  wide?: boolean
+  resultsOnly?: boolean
+  resource?: string
+}
+
+export interface OutputOptions<TData = unknown> extends RenderOptions {
   format: OutputFormat
   quiet: boolean
   quietValue?: string | string[] | ((data: TData) => string | string[] | undefined)
@@ -15,7 +32,18 @@ export const outputFlags = {
   output: Flags.string({
     options: [...OUTPUT_FORMATS],
     description: 'Output format',
-    default: 'table',
+  }),
+  plain: Flags.boolean({
+    description: 'Shorthand for --output plain',
+    default: false,
+  }),
+  'results-only': Flags.boolean({
+    description: 'For --output json, print only the primary data payload',
+    default: false,
+  }),
+  wide: Flags.boolean({
+    description: 'Include additional wide columns in table/plain modes',
+    default: false,
   }),
   quiet: Flags.boolean({
     description: 'Suppress standard output and print compact identifiers only',
@@ -27,20 +55,16 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-function scalarToString(value: unknown): string {
-  if (value === null || value === undefined) {
-    return ''
-  }
+function normalizeCell(value: string): string {
+  return value.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim()
+}
 
-  if (typeof value === 'string') {
+function padCell(value: string, width: number): string {
+  if (value.length >= width) {
     return value
   }
 
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value)
-  }
-
-  return JSON.stringify(value)
+  return `${value}${' '.repeat(width - value.length)}`
 }
 
 function inferQuietValue(data: unknown): string[] {
@@ -79,60 +103,146 @@ function serializeNdjson(data: unknown): string {
   return JSON.stringify(data)
 }
 
-function renderTable(data: unknown): string {
-  if (Array.isArray(data)) {
-    if (data.length === 0) {
-      return 'No results.'
-    }
-
-    const firstObject = data.find((item) => isPlainObject(item))
-    if (!firstObject) {
-      const table = new Table({ head: ['value'] })
-      for (const entry of data) {
-        table.push([scalarToString(entry)])
-      }
-
-      return table.toString()
-    }
-
-    const headers = Object.keys(firstObject)
-    const table = new Table({ head: headers })
-
-    for (const row of data) {
-      if (!isPlainObject(row)) {
-        table.push([scalarToString(row)])
-        continue
-      }
-
-      table.push(headers.map((header) => scalarToString(row[header])))
-    }
-
-    return table.toString()
+function renderAlignedTable(headers: string[], rows: string[][]): string {
+  if (rows.length === 0) {
+    return 'No results.'
   }
 
-  if (isPlainObject(data)) {
-    const table = new Table({ head: ['field', 'value'] })
+  const widths = headers.map((header, index) => {
+    const maxRowWidth = rows.reduce((maxWidth, row) => {
+      const cell = row[index] ?? ''
+      return Math.max(maxWidth, cell.length)
+    }, 0)
 
-    for (const [key, value] of Object.entries(data)) {
-      table.push([key, scalarToString(value)])
-    }
+    return Math.max(header.length, maxRowWidth)
+  })
 
-    return table.toString()
-  }
+  const headerLine = headers.map((header, index) => padCell(header, widths[index] ?? 0)).join('  ')
+  const bodyLines = rows.map((row) =>
+    headers
+      .map((_, index) => {
+        const cell = row[index] ?? nullPlaceholder
+        return padCell(cell, widths[index] ?? 0)
+      })
+      .join('  '),
+  )
 
-  return scalarToString(data)
+  return [headerLine, ...bodyLines].join('\n')
 }
 
-export function serializeOutput(data: unknown, format: OutputFormat): string {
+function renderTsv(headers: string[], rows: string[][]): string {
+  if (headers.length === 0) {
+    return ''
+  }
+
+  const lines = [headers.join('\t')]
+  for (const row of rows) {
+    lines.push(row.map((cell) => normalizeCell(cell)).join('\t'))
+  }
+
+  return lines.join('\n')
+}
+
+function renderDetailTable(fields: Array<{ label: string; value: string }>): string {
+  if (fields.length === 0) {
+    return 'No results.'
+  }
+
+  const labelWidth = fields.reduce((max, field) => Math.max(max, field.label.length), 0)
+  return fields.map((field) => `${padCell(field.label, labelWidth)}\t${field.value}`).join('\n')
+}
+
+function renderDetailPlain(fields: Array<{ label: string; value: string }>): string {
+  if (fields.length === 0) {
+    return ''
+  }
+
+  return fields.map((field) => `${field.label}\t${normalizeCell(field.value)}`).join('\n')
+}
+
+function extractPrimaryData(data: unknown, primaryPath: string | undefined): unknown {
+  if (!primaryPath) {
+    return data
+  }
+
+  const extracted = resolveDotPath(data, primaryPath)
+  return extracted === undefined ? data : extracted
+}
+
+function maybeExtractDataArray(data: unknown): unknown[] | undefined {
+  if (Array.isArray(data)) {
+    return data
+  }
+
+  const extracted = resolveDotPath(data, 'data')
+  return Array.isArray(extracted) ? extracted : undefined
+}
+
+function maybeExtractDetailRecord(data: unknown): Record<string, unknown> | undefined {
+  if (isPlainObject(data)) {
+    return data
+  }
+
+  const extracted = resolveDotPath(data, 'data')
+  return isPlainObject(extracted) ? extracted : undefined
+}
+
+function serializeHumanOutput(data: unknown, format: 'table' | 'plain', options?: RenderOptions): string {
+  const wide = options?.wide ?? false
+  const listItems = Array.isArray(data) ? data : maybeExtractDataArray(data)
+
+  if (listItems) {
+    const sample = listItems.find((item) => isPlainObject(item)) ?? listItems[0] ?? {}
+    const presenter = options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', sample)
+    const columns = presenter.listColumns.filter((column) => !column.wide || wide)
+    const headers = columns.map((column) => column.header)
+
+    const rows = projectListRows(listItems, presenter, wide).map((row) =>
+      columns.map((column) => {
+        const value = row[column.header] ?? nullPlaceholder
+        const normalized = normalizeCell(value)
+
+        if (format === 'table' && typeof column.maxWidth === 'number' && column.maxWidth > 0) {
+          return truncate(normalized, column.maxWidth)
+        }
+
+        return normalized
+      }),
+    )
+
+    return format === 'plain' ? renderTsv(headers, rows) : renderAlignedTable(headers, rows)
+  }
+
+  const detailRecord = maybeExtractDetailRecord(data)
+  if (detailRecord) {
+    const presenter = options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', detailRecord)
+    const fields = projectDetailFields(detailRecord, presenter, wide)
+
+    return format === 'plain' ? renderDetailPlain(fields) : renderDetailTable(fields)
+  }
+
+  return formatDisplayValue(data)
+}
+
+export function serializeOutput(data: unknown, format: OutputFormat, options?: RenderOptions): string {
   switch (format) {
-    case 'json':
-      return JSON.stringify(data, null, 2)
+    case 'json': {
+      const output =
+        options?.resultsOnly === true
+          ? extractPrimaryData(data, options.presenter?.primaryPath ?? 'data')
+          : data
+
+      return JSON.stringify(output, null, 2)
+    }
+
     case 'yaml':
       return yamlStringify(data)
     case 'ndjson':
       return serializeNdjson(data)
     case 'table':
-      return renderTable(data)
+      return serializeHumanOutput(data, 'table', options)
+    case 'plain':
+      return serializeHumanOutput(data, 'plain', options)
     default: {
       const exhaustiveCheck: never = format
       throw new Error(`Unsupported output format: ${String(exhaustiveCheck)}`)
@@ -168,5 +278,12 @@ export function outputResult<TData>(
     return
   }
 
-  process.stdout.write(serializeOutput(data, options.format) + '\n')
+  process.stdout.write(
+    serializeOutput(data, options.format, {
+      presenter: options.presenter,
+      wide: options.wide,
+      resultsOnly: options.resultsOnly,
+      resource: options.resource,
+    }) + '\n',
+  )
 }

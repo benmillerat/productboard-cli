@@ -7,7 +7,11 @@ export abstract class V2BaseCommand extends BaseCommand {
     token?: string
     profile?: string
     output?: string
+    plain?: boolean
     quiet?: boolean
+    wide?: boolean
+    debug?: boolean
+    'results-only'?: boolean
     'api-url'?: string
   }): Promise<RuntimeContext> {
     return super.initRuntime(flags, { apiVersion: PRODUCTBOARD_API_VERSION_V2 })
