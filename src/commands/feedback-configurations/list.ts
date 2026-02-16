@@ -48,10 +48,13 @@ export default class FeedbackConfigurationsList extends BaseCommand {
       next: result.next,
     }
 
-    outputResult(this.log, runtime.output === 'table' ? result.items : payload, {
+    outputResult(this.log, payload, {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: quietIds,
+      resource: 'feedback-configurations',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

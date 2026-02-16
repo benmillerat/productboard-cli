@@ -27,6 +27,9 @@ export default class WebhooksGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.id),
+      resource: 'webhooks',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

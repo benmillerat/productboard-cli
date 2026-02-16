@@ -27,6 +27,9 @@ export default class UsersGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.id),
+      resource: 'users',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

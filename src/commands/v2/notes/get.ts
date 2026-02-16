@@ -29,6 +29,9 @@ export default class V2NotesGet extends V2BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.id),
+      resource: 'v2/notes',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

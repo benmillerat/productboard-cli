@@ -29,6 +29,9 @@ export default class JiraIntegrationsConnectionsGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.featureId),
+      resource: 'jira-integrations/connections',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

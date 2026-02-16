@@ -2,6 +2,7 @@ import { Args } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { initiativesPresenter } from '../../core/presenters/initiatives.js'
 import { extractResource, resourceQuietId } from '../../core/resource-helpers.js'
 import type { ResourceRecord, ResourceResponse } from '../../core/resource-helpers.js'
 
@@ -27,6 +28,9 @@ export default class InitiativesGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.id),
+      presenter: initiativesPresenter,
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

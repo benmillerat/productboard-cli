@@ -1,4 +1,10 @@
-import { nullPlaceholder, type ColumnSpec, type DetailField, type Presenter } from '../presenter.js'
+import {
+  nullPlaceholder,
+  stripHtml,
+  type ColumnSpec,
+  type DetailField,
+  type Presenter,
+} from '../presenter.js'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -9,7 +15,12 @@ function toGenericValue(value: unknown): unknown {
     return nullPlaceholder
   }
 
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+  if (typeof value === 'string') {
+    const cleaned = stripHtml(value)
+    return cleaned.length > 0 ? cleaned : nullPlaceholder
+  }
+
+  if (typeof value === 'number' || typeof value === 'boolean') {
     return value
   }
 
@@ -26,12 +37,13 @@ function keyToHeader(key: string): string {
 
 function buildColumns(keys: string[]): ColumnSpec[] {
   if (keys.length === 0) {
-    return [{ header: 'VALUE', accessor: (item) => toGenericValue(item.value) }]
+    return [{ header: 'VALUE', accessor: (item) => toGenericValue(item.value), maxWidth: 60 }]
   }
 
   return keys.map((key) => ({
     header: keyToHeader(key),
     accessor: (item: Record<string, unknown>) => toGenericValue(item[key]),
+    maxWidth: 60,
   }))
 }
 

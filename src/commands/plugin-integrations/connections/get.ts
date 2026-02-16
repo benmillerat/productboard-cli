@@ -29,6 +29,9 @@ export default class PluginIntegrationsConnectionsGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.featureId),
+      resource: 'plugin-integrations/connections',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

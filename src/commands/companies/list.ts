@@ -2,6 +2,7 @@ import { Flags } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { outputResult } from '../../core/output.js'
+import { companiesPresenter } from '../../core/presenters/companies.js'
 import { listResources, parseKeyValuePairs } from '../../core/resource-helpers.js'
 import type { ResourceRecord } from '../../core/resource-helpers.js'
 
@@ -25,7 +26,7 @@ export default class CompaniesList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(CompaniesList)
+    const { flags } = await this.parse(CompaniesList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit
@@ -48,10 +49,13 @@ export default class CompaniesList extends BaseCommand {
       next: result.next,
     }
 
-    outputResult(this.log, runtime.output === 'table' ? result.items : payload, {
+    outputResult(this.log, payload, {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: quietIds,
+      presenter: companiesPresenter,
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

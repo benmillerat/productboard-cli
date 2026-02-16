@@ -53,10 +53,13 @@ export default class ObjectivesLinksInitiativesList extends BaseCommand {
       next: result.next,
     }
 
-    outputResult(this.log, runtime.output === 'table' ? result.items : payload, {
+    outputResult(this.log, payload, {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: quietIds,
+      resource: 'objectives/links/initiatives',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

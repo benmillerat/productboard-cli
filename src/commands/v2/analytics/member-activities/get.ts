@@ -29,6 +29,9 @@ export default class V2AnalyticsMemberActivitiesGet extends V2BaseCommand {
     outputResult(this.log, response, {
       format: runtime.output,
       quiet: runtime.quiet,
+      resource: 'v2/analytics/member-activities',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

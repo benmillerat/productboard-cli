@@ -29,6 +29,9 @@ export default class V2EntitiesConfigurationsGet extends V2BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.type),
+      resource: 'v2/entities/configurations',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

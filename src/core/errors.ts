@@ -58,6 +58,11 @@ function extractMessage(payload: unknown): string | undefined {
     return directMessage
   }
 
+  const directTitle = record.title
+  if (typeof directTitle === 'string' && directTitle.trim().length > 0) {
+    return directTitle
+  }
+
   const nestedError = record.error
   if (typeof nestedError === 'object' && nestedError !== null) {
     const nestedMessage = (nestedError as Record<string, unknown>).message
@@ -78,6 +83,11 @@ function extractMessage(payload: unknown): string | undefined {
       const firstMessage = firstRecord.message
       if (typeof firstMessage === 'string' && firstMessage.trim().length > 0) {
         return firstMessage
+      }
+
+      const firstTitle = firstRecord.title
+      if (typeof firstTitle === 'string' && firstTitle.trim().length > 0) {
+        return firstTitle
       }
 
       const firstDetail = firstRecord.detail

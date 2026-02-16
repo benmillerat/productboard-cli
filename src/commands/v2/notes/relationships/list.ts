@@ -54,10 +54,13 @@ export default class V2NotesRelationshipsList extends V2BaseCommand {
       next: result.next,
     }
 
-    outputResult(this.log, runtime.output === 'table' ? result.items : payload, {
+    outputResult(this.log, payload, {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: quietIds,
+      resource: 'v2/notes/relationships',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

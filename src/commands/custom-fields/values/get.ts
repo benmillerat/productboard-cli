@@ -36,6 +36,9 @@ export default class CustomFieldsValuesGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource),
+      resource: 'custom-fields/values',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

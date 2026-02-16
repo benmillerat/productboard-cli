@@ -29,6 +29,9 @@ export default class CompaniesFieldValuesGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource, args.companyCustomFieldId),
+      resource: 'companies/field-values',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

@@ -36,6 +36,9 @@ export default class FeatureReleaseAssignmentsGet extends BaseCommand {
       format: runtime.output,
       quiet: runtime.quiet,
       quietValue: resourceQuietId(resource),
+      resource: 'feature-release-assignments',
+      wide: runtime.wide,
+      resultsOnly: runtime.resultsOnly,
     })
   }
 }

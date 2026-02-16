@@ -187,6 +187,31 @@ function maybeExtractDetailRecord(data: unknown): Record<string, unknown> | unde
   return isPlainObject(extracted) ? extracted : undefined
 }
 
+function hasMoreResults(data: unknown): boolean {
+  if (!isPlainObject(data)) {
+    return false
+  }
+
+  const listItems = maybeExtractDataArray(data)
+  if (!listItems) {
+    return false
+  }
+
+  const hasMore = data.hasMore === true
+  const next = data.next
+  const hasNextCursor = next !== null && next !== undefined
+
+  return hasMore || hasNextCursor
+}
+
+function emitPaginationHint(data: unknown): void {
+  if (!hasMoreResults(data)) {
+    return
+  }
+
+  process.stderr.write('# More results available. Use --cursor <token> or --all to fetch more.\n')
+}
+
 function serializeHumanOutput(data: unknown, format: 'table' | 'plain', options?: RenderOptions): string {
   const wide = options?.wide ?? false
   const listItems = Array.isArray(data) ? data : maybeExtractDataArray(data)
@@ -276,6 +301,10 @@ export function outputResult<TData>(
     }
 
     return
+  }
+
+  if (options.format === 'table' || options.format === 'plain') {
+    emitPaginationHint(data)
   }
 
   process.stdout.write(

@@ -84,4 +84,55 @@ describe('core/output', () => {
 
     expect(writeSpy).toHaveBeenCalledWith('fea_1\nfea_2\n')
   })
+
+  it('emits pagination hint to stderr for table/plain output when more results exist', () => {
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+
+    const payload = {
+      data: [{ id: 'fea_1', name: 'Alpha' }],
+      hasMore: true,
+      next: 'cursor_123',
+    }
+
+    outputResult(() => {}, payload, {
+      format: 'table',
+      quiet: false,
+      presenter: testPresenter,
+    })
+
+    outputResult(() => {}, payload, {
+      format: 'plain',
+      quiet: false,
+      presenter: testPresenter,
+    })
+
+    expect(stdoutSpy).toHaveBeenCalled()
+    expect(stderrSpy).toHaveBeenCalledWith(
+      '# More results available. Use --cursor <token> or --all to fetch more.\n',
+    )
+    expect(stderrSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not emit pagination hint for json output', () => {
+    const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
+
+    outputResult(
+      () => {},
+      {
+        data: [{ id: 'fea_1', name: 'Alpha' }],
+        hasMore: true,
+        next: 'cursor_123',
+      },
+      {
+        format: 'json',
+        quiet: false,
+        presenter: testPresenter,
+      },
+    )
+
+    expect(stdoutSpy).toHaveBeenCalled()
+    expect(stderrSpy).not.toHaveBeenCalled()
+  })
 })
