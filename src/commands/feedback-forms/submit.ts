@@ -21,7 +21,10 @@ export default class FeedbackFormsSubmit extends BaseCommand {
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')
-    const response = await runtime.client.post<ResourceResponse<ResourceRecord>>('/feedback-forms', body)
+    const response = await runtime.client.post<ResourceResponse<ResourceRecord>>(
+      '/feedback-forms',
+      body,
+    )
     const resource = extractResource(response)
 
     outputResult(this.log, resource, {

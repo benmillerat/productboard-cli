@@ -25,7 +25,7 @@ export default class JiraIntegrationsList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(JiraIntegrationsList)
+    const { flags } = await this.parse(JiraIntegrationsList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

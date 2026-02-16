@@ -2,7 +2,11 @@ import { Flags } from '@oclif/core'
 
 import { BaseCommand, commonFlags } from '../../../core/base-command.js'
 import { outputResult } from '../../../core/output.js'
-import { extractResource, parseJsonObject, resourceQuietId } from '../../../core/resource-helpers.js'
+import {
+  extractResource,
+  parseJsonObject,
+  resourceQuietId,
+} from '../../../core/resource-helpers.js'
 import type { ResourceRecord, ResourceResponse } from '../../../core/resource-helpers.js'
 
 export default class CompaniesFieldsCreate extends BaseCommand {
@@ -16,7 +20,7 @@ export default class CompaniesFieldsCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(CompaniesFieldsCreate)
+    const { flags } = await this.parse(CompaniesFieldsCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

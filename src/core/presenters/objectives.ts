@@ -107,7 +107,11 @@ export const objectivesPresenter: Presenter = {
     { header: 'OWNER', accessor: ownerEmail },
     { header: 'UPDATED', accessor: (item) => formatDate(resolveDotPath(item, 'updatedAt')) },
     { header: 'TIMEFRAME', accessor: timeframe, wide: true },
-    { header: 'ARCHIVED', accessor: (item) => formatBoolean(resolveDotPath(item, 'archived')), wide: true },
+    {
+      header: 'ARCHIVED',
+      accessor: (item) => formatBoolean(resolveDotPath(item, 'archived')),
+      wide: true,
+    },
     { header: 'LEVEL', accessor: levelValue, wide: true },
     { header: 'URL', accessor: linksSelf, wide: true },
   ],

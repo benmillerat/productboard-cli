@@ -26,7 +26,7 @@ export default class ObjectivesList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(ObjectivesList)
+    const { flags } = await this.parse(ObjectivesList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

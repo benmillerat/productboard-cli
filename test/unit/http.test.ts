@@ -35,9 +35,12 @@ describe('core/http debug logging', () => {
 
     const debugOutput = stderrSpy.mock.calls.map((call) => String(call[0])).join('')
 
-    expect(debugOutput).toContain('→ GET /features (query: limit=3)')
-    expect(debugOutput).toContain('← 200')
-    expect(debugOutput).toContain('[req-id: req-123]')
+    expect(debugOutput).toContain('DEBUG: GET /features?limit=3')
+    expect(debugOutput).toContain('DEBUG: Request headers:')
+    expect(debugOutput).toContain('"Authorization":"Bearer ***"')
+    expect(debugOutput).toContain('DEBUG: GET /features?limit=3 → 200')
+    expect(debugOutput).toContain('DEBUG: Response size:')
+    expect(debugOutput).toContain('DEBUG: x-request-id: req-123')
     expect(debugOutput).not.toContain('test-token')
     expect(nock.isDone()).toBe(true)
   })

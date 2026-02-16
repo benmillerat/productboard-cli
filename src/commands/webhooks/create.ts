@@ -16,7 +16,7 @@ export default class WebhooksCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(WebhooksCreate)
+    const { flags } = await this.parse(WebhooksCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

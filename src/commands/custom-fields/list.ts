@@ -25,7 +25,7 @@ export default class CustomFieldsList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(CustomFieldsList)
+    const { flags } = await this.parse(CustomFieldsList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

@@ -69,7 +69,11 @@ export const featuresPresenter: Presenter = {
     { header: 'UPDATED', accessor: (item) => formatDate(resolveDotPath(item, 'updatedAt')) },
     { header: 'PARENT', accessor: firstParentId, wide: true },
     { header: 'TIMEFRAME', accessor: timeframeValue, wide: true },
-    { header: 'ARCHIVED', accessor: (item) => formatBoolean(resolveDotPath(item, 'archived')), wide: true },
+    {
+      header: 'ARCHIVED',
+      accessor: (item) => formatBoolean(resolveDotPath(item, 'archived')),
+      wide: true,
+    },
     { header: 'URL', accessor: linksHtml, wide: true },
   ],
   detailFields: [

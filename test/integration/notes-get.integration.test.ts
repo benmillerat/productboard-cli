@@ -40,7 +40,7 @@ describe('notes get command integration', () => {
     await NotesGet.run(['note_123', '--api-url', apiBaseUrl, '--output', 'json'])
 
     expect(stdoutSpy).toHaveBeenCalled()
-    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    const output = stdoutSpy.mock.calls.map((c) => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {
@@ -54,19 +54,21 @@ describe('notes get command integration', () => {
   })
 
   it('prints only id when quiet mode is enabled', async () => {
-    nock(apiBaseUrl).get('/notes/note_456').reply(200, {
-      data: {
-        id: 'note_456',
-        title: 'Escalation note',
-      },
-    })
+    nock(apiBaseUrl)
+      .get('/notes/note_456')
+      .reply(200, {
+        data: {
+          id: 'note_456',
+          title: 'Escalation note',
+        },
+      })
 
     const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
     await NotesGet.run(['note_456', '--api-url', apiBaseUrl, '--quiet'])
 
     expect(stdoutSpy).toHaveBeenCalled()
-    const quietOutput = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    const quietOutput = stdoutSpy.mock.calls.map((c) => String(c[0])).join('')
     expect(quietOutput.trim()).toBe('note_456')
   })
 })

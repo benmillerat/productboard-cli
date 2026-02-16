@@ -1,4 +1,10 @@
-import { formatDate, nullPlaceholder, resolveDotPath, stripHtml, type Presenter } from '../presenter.js'
+import {
+  formatDate,
+  nullPlaceholder,
+  resolveDotPath,
+  stripHtml,
+  type Presenter,
+} from '../presenter.js'
 
 function pickOwner(item: Record<string, unknown>): string {
   const ownerName = resolveDotPath(item, 'owner.name')

@@ -149,7 +149,7 @@ export function formatDisplayValue(value: unknown): string {
     const serialized = JSON.stringify(value)
     return typeof serialized === 'string' ? serialized : nullPlaceholder
   } catch {
-    return String(value)
+    return '[unserializable]'
   }
 }
 

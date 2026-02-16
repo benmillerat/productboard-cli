@@ -25,7 +25,7 @@ export default class PluginIntegrationsList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(PluginIntegrationsList)
+    const { flags } = await this.parse(PluginIntegrationsList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

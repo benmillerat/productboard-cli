@@ -56,7 +56,10 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function normalizeCell(value: string): string {
-  return value.replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim()
+  return value
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function padCell(value: string, width: number): string {
@@ -176,11 +179,11 @@ function extractPrimaryData(data: unknown, primaryPath: string | undefined): unk
 
 function maybeExtractDataArray(data: unknown): unknown[] | undefined {
   if (Array.isArray(data)) {
-    return data
+    return data as unknown[]
   }
 
   const extracted = resolveDotPath(data, 'data')
-  return Array.isArray(extracted) ? extracted : undefined
+  return Array.isArray(extracted) ? (extracted as unknown[]) : undefined
 }
 
 function maybeExtractDetailRecord(data: unknown): Record<string, unknown> | undefined {
@@ -217,13 +220,18 @@ function emitPaginationHint(data: unknown): void {
   process.stderr.write('# More results available. Use --cursor <token> or --all to fetch more.\n')
 }
 
-function serializeHumanOutput(data: unknown, format: 'table' | 'plain', options?: RenderOptions): string {
+function serializeHumanOutput(
+  data: unknown,
+  format: 'table' | 'plain',
+  options?: RenderOptions,
+): string {
   const wide = options?.wide ?? false
   const listItems = Array.isArray(data) ? data : maybeExtractDataArray(data)
 
   if (listItems) {
     const sample = listItems.find((item) => isPlainObject(item)) ?? listItems[0] ?? {}
-    const presenter = options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', sample)
+    const presenter =
+      options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', sample)
     const columns = presenter.listColumns.filter((column) => !column.wide || wide)
     const headers = columns.map((column) => column.header)
 
@@ -245,7 +253,8 @@ function serializeHumanOutput(data: unknown, format: 'table' | 'plain', options?
 
   const detailRecord = maybeExtractDetailRecord(data)
   if (detailRecord) {
-    const presenter = options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', detailRecord)
+    const presenter =
+      options?.presenter ?? createGenericPresenter(options?.resource ?? 'resource', detailRecord)
     const fields = projectDetailFields(detailRecord, presenter, wide)
 
     return format === 'plain' ? renderDetailPlain(fields) : renderDetailTable(fields)
@@ -254,7 +263,11 @@ function serializeHumanOutput(data: unknown, format: 'table' | 'plain', options?
   return formatDisplayValue(data)
 }
 
-export function serializeOutput(data: unknown, format: OutputFormat, options?: RenderOptions): string {
+export function serializeOutput(
+  data: unknown,
+  format: OutputFormat,
+  options?: RenderOptions,
+): string {
   switch (format) {
     case 'json': {
       const output =

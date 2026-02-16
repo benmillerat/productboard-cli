@@ -65,6 +65,33 @@ function toRecord(value: unknown): Record<string, unknown> | null {
   return null
 }
 
+function formatDebugPath(url: URL): string {
+  const query = url.searchParams.toString()
+  return query.length > 0 ? `${url.pathname}?${query}` : url.pathname
+}
+
+function maskHeaderValue(headerName: string, value: string): string {
+  if (headerName.toLowerCase() !== 'authorization') {
+    return value
+  }
+
+  if (/^bearer\s+/i.test(value)) {
+    return 'Bearer ***'
+  }
+
+  return '***'
+}
+
+function sanitizeHeaders(headers: Record<string, string>): Record<string, string> {
+  const sanitized: Record<string, string> = {}
+
+  for (const [headerName, value] of Object.entries(headers)) {
+    sanitized[headerName] = maskHeaderValue(headerName, value)
+  }
+
+  return sanitized
+}
+
 export class HttpClient {
   private readonly token: string
   private readonly baseUrl: string
@@ -82,28 +109,55 @@ export class HttpClient {
     this.debug = options.debug ?? false
   }
 
-  private logDebugRequest(method: HttpMethod, url: URL): void {
+  private logDebugLine(message: string): void {
     if (!this.debug) {
       return
     }
 
-    const query = url.searchParams.toString()
-    const querySegment = query.length > 0 ? ` (query: ${query})` : ''
-    process.stderr.write(`→ ${method} ${url.pathname}${querySegment}\n`)
+    process.stderr.write(`DEBUG: ${message}\n`)
   }
 
-  private logDebugResponse(response: Response, durationMs: number): void {
+  private logDebugRequest(method: HttpMethod, url: URL, headers: Record<string, string>): void {
     if (!this.debug) {
       return
     }
 
-    const statusText = response.statusText.trim().length > 0 ? response.statusText : 'Unknown'
-    const requestId = response.headers.get('x-request-id')
-    const requestIdSegment = requestId ? ` [req-id: ${requestId}]` : ''
+    this.logDebugLine(`${method} ${formatDebugPath(url)}`)
+    this.logDebugLine(`Request headers: ${JSON.stringify(sanitizeHeaders(headers))}`)
+  }
 
-    process.stderr.write(
-      `← ${response.status} ${statusText} (${durationMs}ms)${requestIdSegment}\n`,
-    )
+  private logDebugResponse(
+    method: HttpMethod,
+    url: URL,
+    response: Response,
+    durationMs: number,
+    responseSizeBytes: number,
+  ): void {
+    if (!this.debug) {
+      return
+    }
+
+    this.logDebugLine(`${method} ${formatDebugPath(url)} → ${response.status} (${durationMs}ms)`)
+    this.logDebugLine(`Response size: ${responseSizeBytes} bytes`)
+
+    const requestId = response.headers.get('x-request-id')
+    if (requestId) {
+      this.logDebugLine(`x-request-id: ${requestId}`)
+    }
+  }
+
+  private logDebugTransportError(
+    method: HttpMethod,
+    url: URL,
+    error: unknown,
+    durationMs: number,
+  ): void {
+    if (!this.debug) {
+      return
+    }
+
+    const message = error instanceof Error ? error.message : String(error)
+    this.logDebugLine(`${method} ${formatDebugPath(url)} → ERROR (${durationMs}ms): ${message}`)
   }
 
   public async get<TResponse>(
@@ -172,7 +226,7 @@ export class HttpClient {
       const timeout = setTimeout(() => controller.abort(), this.timeoutMs)
       const startedAt = Date.now()
 
-      this.logDebugRequest(method, url)
+      this.logDebugRequest(method, url, headers)
 
       try {
         const response = await fetch(url, {
@@ -184,10 +238,11 @@ export class HttpClient {
 
         clearTimeout(timeout)
 
-        const durationMs = Date.now() - startedAt
-        this.logDebugResponse(response, durationMs)
-
         const rawText = await response.text()
+        const durationMs = Date.now() - startedAt
+        const responseSizeBytes = Buffer.byteLength(rawText, 'utf8')
+        this.logDebugResponse(method, url, response, durationMs, responseSizeBytes)
+
         let payload: unknown
 
         if (rawText.length > 0) {
@@ -225,6 +280,9 @@ export class HttpClient {
         if (error instanceof ApiError) {
           throw error
         }
+
+        const durationMs = Date.now() - startedAt
+        this.logDebugTransportError(method, url, error, durationMs)
 
         if (error instanceof Error && error.name === 'AbortError') {
           throw new ApiError(

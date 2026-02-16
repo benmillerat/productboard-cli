@@ -51,7 +51,7 @@ describe('features list command integration', () => {
     await FeaturesList.run(['--api-url', apiBaseUrl, '--output', 'json', '--limit', '3'])
 
     expect(stdoutSpy).toHaveBeenCalled()
-    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    const output = stdoutSpy.mock.calls.map((c) => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {
@@ -70,31 +70,30 @@ describe('features list command integration', () => {
     nock(apiBaseUrl)
       .get('/features')
       .matchHeader('authorization', 'Bearer test-token')
-      .reply(200, {
-        data: [{ id: 'fea_1', name: 'Alpha', status: { name: 'Planned' } }],
-      }, {
-        'x-request-id': 'req_debug_123',
-      })
+      .reply(
+        200,
+        {
+          data: [{ id: 'fea_1', name: 'Alpha', status: { name: 'Planned' } }],
+        },
+        {
+          'x-request-id': 'req_debug_123',
+        },
+      )
 
     const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
     const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(() => true)
 
-    await FeaturesList.run([
-      '--api-url',
-      apiBaseUrl,
-      '--output',
-      'json',
-      '--limit',
-      '1',
-      '--debug',
-    ])
+    await FeaturesList.run(['--api-url', apiBaseUrl, '--output', 'json', '--limit', '1', '--debug'])
 
     const debugOutput = stderrSpy.mock.calls.map((call) => String(call[0])).join('')
 
     expect(stdoutSpy).toHaveBeenCalled()
-    expect(debugOutput).toContain('→ GET /features')
-    expect(debugOutput).toContain('← 200')
-    expect(debugOutput).toContain('[req-id: req_debug_123]')
+    expect(debugOutput).toContain('DEBUG: GET /features')
+    expect(debugOutput).toContain('DEBUG: Request headers:')
+    expect(debugOutput).toContain('"Authorization":"Bearer ***"')
+    expect(debugOutput).toContain('DEBUG: GET /features → 200')
+    expect(debugOutput).toContain('DEBUG: Response size:')
+    expect(debugOutput).toContain('DEBUG: x-request-id: req_debug_123')
     expect(debugOutput).not.toContain('test-token')
     expect(nock.isDone()).toBe(true)
   })

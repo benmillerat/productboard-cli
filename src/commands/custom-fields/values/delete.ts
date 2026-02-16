@@ -29,7 +29,9 @@ export default class CustomFieldsValuesDelete extends BaseCommand {
     await confirmOrThrow({
       yes: runtime.yes,
       noInput: runtime.noInput,
-      prompt: `Delete custom field value matching ${Object.entries(query).map(([key, value]) => `${key}=${value}`).join(', ')}?`,
+      prompt: `Delete custom field value matching ${Object.entries(query)
+        .map(([key, value]) => `${key}=${value}`)
+        .join(', ')}?`,
     })
     await runtime.client.delete('/hierarchy-entities/custom-fields-values/value', { query })
 

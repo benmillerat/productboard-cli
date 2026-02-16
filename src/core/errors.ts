@@ -103,7 +103,8 @@ function extractMessage(payload: unknown): string | undefined {
 export function mapHttpError(status: number, payload: unknown, rawText?: string): ApiError {
   const rawMessage =
     typeof rawText === 'string' && rawText.trim().length > 0 ? rawText.trim() : undefined
-  const fallback = extractMessage(payload) ?? rawMessage ?? `Productboard API returned HTTP ${status}.`
+  const fallback =
+    extractMessage(payload) ?? rawMessage ?? `Productboard API returned HTTP ${status}.`
 
   const defaultMessageByStatus: Record<number, string> = {
     401: 'Authentication failed. Check your Productboard API token. (HTTP 401)',

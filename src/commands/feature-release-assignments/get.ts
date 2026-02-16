@@ -3,7 +3,11 @@ import { Flags } from '@oclif/core'
 import { BaseCommand, commonFlags } from '../../core/base-command.js'
 import { ValidationError } from '../../core/errors.js'
 import { outputResult } from '../../core/output.js'
-import { extractResource, parseKeyValuePairs, resourceQuietId } from '../../core/resource-helpers.js'
+import {
+  extractResource,
+  parseKeyValuePairs,
+  resourceQuietId,
+} from '../../core/resource-helpers.js'
 import type { ResourceRecord, ResourceResponse } from '../../core/resource-helpers.js'
 
 export default class FeatureReleaseAssignmentsGet extends BaseCommand {

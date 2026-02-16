@@ -16,7 +16,7 @@ export default class ComponentsCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(ComponentsCreate)
+    const { flags } = await this.parse(ComponentsCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

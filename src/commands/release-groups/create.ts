@@ -16,7 +16,7 @@ export default class ReleaseGroupsCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(ReleaseGroupsCreate)
+    const { flags } = await this.parse(ReleaseGroupsCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

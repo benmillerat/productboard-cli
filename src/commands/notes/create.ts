@@ -16,7 +16,7 @@ export default class NotesCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(NotesCreate)
+    const { flags } = await this.parse(NotesCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

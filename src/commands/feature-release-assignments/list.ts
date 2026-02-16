@@ -32,10 +32,14 @@ export default class FeatureReleaseAssignmentsList extends BaseCommand {
     const limit = flags.all ? 1000 : flags.limit
     const query = parseKeyValuePairs(flags.query, '--query')
 
-    const result = await listResources<ResourceRecord>(runtime.client, '/feature-release-assignments', {
-      limit,
-      query: Object.keys(query).length > 0 ? query : undefined,
-    })
+    const result = await listResources<ResourceRecord>(
+      runtime.client,
+      '/feature-release-assignments',
+      {
+        limit,
+        query: Object.keys(query).length > 0 ? query : undefined,
+      },
+    )
 
     const quietIds = result.items
       .map((item) => (typeof item.id === 'string' ? item.id : undefined))

@@ -34,7 +34,8 @@ function decodeJwtPayload(token: string): JwtPayload {
 }
 
 export default class AuthWhoAmI extends BaseCommand {
-  public static override description = 'Decode and display the current Productboard API token identity'
+  public static override description =
+    'Decode and display the current Productboard API token identity'
 
   public static override flags = {
     ...commonFlags,

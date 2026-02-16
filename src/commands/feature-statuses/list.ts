@@ -25,7 +25,7 @@ export default class FeatureStatusesList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(FeatureStatusesList)
+    const { flags } = await this.parse(FeatureStatusesList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

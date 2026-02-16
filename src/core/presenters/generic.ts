@@ -27,7 +27,7 @@ function toGenericValue(value: unknown): unknown {
   try {
     return JSON.stringify(value)
   } catch {
-    return String(value)
+    return '[unserializable]'
   }
 }
 

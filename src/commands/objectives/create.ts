@@ -16,7 +16,7 @@ export default class ObjectivesCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(ObjectivesCreate)
+    const { flags } = await this.parse(ObjectivesCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

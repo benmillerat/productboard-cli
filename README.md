@@ -4,6 +4,13 @@
 
 It is designed for fast day-to-day API workflows, scripting, and automation, with broad coverage of Productboard v1 endpoints and an isolated `v2` beta namespace.
 
+## What's New in v2.0.0
+
+- Expanded output controls for humans and scripts: `--plain`, `--wide`, `--results-only`
+- Safer delete workflows: confirmation prompts by default, with `--yes` and `--no-input`
+- HTTP troubleshooting mode with `--debug` (request/response logs on stderr, auth masked)
+- Consistent command coverage across the CLI (145 command entries)
+
 ## Why this project
 
 - First open-source Productboard-focused CLI with broad API coverage
@@ -14,6 +21,8 @@ It is designed for fast day-to-day API workflows, scripting, and automation, wit
 ## Installation
 
 ### npm
+
+Current release: **v2.0.0**
 
 ```bash
 npm install -g @benmillerat/productboard-cli
@@ -92,14 +101,14 @@ Global output flags available on commands:
 Behavior:
 
 - `table` (default): clean aligned text table for humans
-- `plain`: tab-separated output for scripts (TSV)
+- `plain`: tab-separated output for scripts (TSV), without table-style truncation
 - `json`: pretty JSON (full API envelope by default)
 - `yaml`: YAML output
 - `ndjson`: one JSON object per line (arrays emit multiple lines)
 - `--results-only`: with `--output json`, emit only primary payload (for example just `data[]`)
 - `--wide`: show additional columns (for example parent IDs/URLs)
 - `--quiet`: emit compact IDs/scalars when possible
-- `--debug`: print `→ METHOD /path` and `← status (ms)` lines to stderr
+- `--debug`: print HTTP logs like `DEBUG: GET /features?limit=25 → 200 (142ms)`, plus masked request headers and response size (stderr only)
 
 Example human table output:
 
@@ -118,13 +127,22 @@ ID\tNAME\tTYPE\tSTATUS\tOWNER\tUPDATED
 Examples:
 
 ```bash
-pb companies list --output table
+# Plain TSV output (script-friendly)
 pb companies list --plain
-pb companies list --output json
-pb companies list --output json --results-only
+
+# Include extra columns in table/plain modes
 pb companies list --wide
+
+# Extract only the primary JSON array payload
+auto_json="$(pb companies list --output json --results-only)"
+
+# Other formats
+pb companies list --output table
+pb companies list --output json
 pb companies list --output yaml
 pb companies list --output ndjson
+
+# Compact scalar output and debug logs
 pb companies get com_123 --quiet
 pb features list --debug --limit 3
 ```

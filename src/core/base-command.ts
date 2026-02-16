@@ -107,7 +107,10 @@ export abstract class BaseCommand extends Command {
       profile: profileName,
     })
 
-    const { output, resultsOnly } = resolveRequestedOutput(flags, profile.defaultOutput ?? config.defaults.output)
+    const { output, resultsOnly } = resolveRequestedOutput(
+      flags,
+      profile.defaultOutput ?? config.defaults.output,
+    )
     const quiet = flags.quiet ?? config.defaults.quiet
     const wide = flags.wide ?? false
     const yes = flags.yes ?? false
@@ -157,7 +160,10 @@ export abstract class BaseCommand extends Command {
     resultsOnly: boolean
   }> {
     const { profileName, profile, config } = await getProfileConfig(flags.profile)
-    const { output, resultsOnly } = resolveRequestedOutput(flags, profile.defaultOutput ?? config.defaults.output)
+    const { output, resultsOnly } = resolveRequestedOutput(
+      flags,
+      profile.defaultOutput ?? config.defaults.output,
+    )
 
     return {
       profileName,

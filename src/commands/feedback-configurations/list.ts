@@ -25,7 +25,7 @@ export default class FeedbackConfigurationsList extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(FeedbackConfigurationsList)
+    const { flags } = await this.parse(FeedbackConfigurationsList)
     const runtime = await this.initRuntime(flags)
 
     const limit = flags.all ? 1000 : flags.limit

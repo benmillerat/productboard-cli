@@ -51,7 +51,7 @@ describe('companies list command integration', () => {
     await CompaniesList.run(['--api-url', apiBaseUrl, '--output', 'json', '--limit', '3'])
 
     expect(stdoutSpy).toHaveBeenCalled()
-    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    const output = stdoutSpy.mock.calls.map((c) => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {

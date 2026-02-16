@@ -44,7 +44,10 @@ export function parseKeyValuePairs(
   return output
 }
 
-export function parseJsonObject(raw: string | undefined, optionName: string): Record<string, unknown> {
+export function parseJsonObject(
+  raw: string | undefined,
+  optionName: string,
+): Record<string, unknown> {
   if (!raw) {
     throw new ValidationError(`${optionName} is required.`)
   }

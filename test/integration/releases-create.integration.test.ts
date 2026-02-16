@@ -51,7 +51,7 @@ describe('releases create command integration', () => {
     ])
 
     expect(stdoutSpy).toHaveBeenCalled()
-    const output = stdoutSpy.mock.calls.map(c => String(c[0])).join('')
+    const output = stdoutSpy.mock.calls.map((c) => String(c[0])).join('')
     expect(typeof output).toBe('string')
 
     const payload = JSON.parse(String(output)) as {

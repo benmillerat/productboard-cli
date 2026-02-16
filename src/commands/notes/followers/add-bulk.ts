@@ -27,7 +27,9 @@ export default class NotesFollowersAddBulk extends BaseCommand {
     const { args, flags } = await this.parse(NotesFollowersAddBulk)
     const runtime = await this.initRuntime(flags)
 
-    const emails = (flags.email ?? []).map((email) => email.trim()).filter((email) => email.length > 0)
+    const emails = (flags.email ?? [])
+      .map((email) => email.trim())
+      .filter((email) => email.length > 0)
 
     const body = flags.data
       ? parseJsonObject(flags.data, '--data')

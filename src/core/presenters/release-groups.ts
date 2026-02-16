@@ -1,4 +1,10 @@
-import { formatBoolean, nullPlaceholder, resolveDotPath, stripHtml, type Presenter } from '../presenter.js'
+import {
+  formatBoolean,
+  nullPlaceholder,
+  resolveDotPath,
+  stripHtml,
+  type Presenter,
+} from '../presenter.js'
 
 function linksSelf(item: Record<string, unknown>): string {
   const url = resolveDotPath(item, 'links.self')

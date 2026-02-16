@@ -72,14 +72,7 @@ describe('features delete command integration', () => {
 
     const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 
-    await FeaturesDelete.run([
-      'fea_123',
-      '--api-url',
-      apiBaseUrl,
-      '--yes',
-      '--output',
-      'json',
-    ])
+    await FeaturesDelete.run(['fea_123', '--api-url', apiBaseUrl, '--yes', '--output', 'json'])
 
     const output = stdoutSpy.mock.calls.map((call) => String(call[0])).join('')
     const payload = JSON.parse(output) as { success: boolean; id: string }

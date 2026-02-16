@@ -1,4 +1,10 @@
-import { formatDate, nullPlaceholder, resolveDotPath, stripHtml, type Presenter } from '../presenter.js'
+import {
+  formatDate,
+  nullPlaceholder,
+  resolveDotPath,
+  stripHtml,
+  type Presenter,
+} from '../presenter.js'
 
 function ownerEmail(item: Record<string, unknown>): string {
   const owner = resolveDotPath(item, 'owner.email')

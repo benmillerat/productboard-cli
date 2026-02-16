@@ -30,7 +30,9 @@ describe('core/errors', () => {
   it('captures retry-after metadata for rate limiting', () => {
     const error = mapHttpError(429, { retryAfter: 9, message: 'slow down' })
 
-    expect(error.message).toBe('Productboard API rate limit reached. Please retry shortly. (HTTP 429)')
+    expect(error.message).toBe(
+      'Productboard API rate limit reached. Please retry shortly. (HTTP 429)',
+    )
     expect(error.retryAfterSeconds).toBe(9)
   })
 })

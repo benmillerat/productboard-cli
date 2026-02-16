@@ -16,7 +16,7 @@ export default class CompaniesCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(CompaniesCreate)
+    const { flags } = await this.parse(CompaniesCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

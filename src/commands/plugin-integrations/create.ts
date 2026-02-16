@@ -16,7 +16,7 @@ export default class PluginIntegrationsCreate extends BaseCommand {
   }
 
   public override async run(): Promise<void> {
-    const {  flags } = await this.parse(PluginIntegrationsCreate)
+    const { flags } = await this.parse(PluginIntegrationsCreate)
     const runtime = await this.initRuntime(flags)
 
     const body = parseJsonObject(flags.data, '--data')

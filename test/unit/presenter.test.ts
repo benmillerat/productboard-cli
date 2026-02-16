@@ -113,14 +113,22 @@ describe('core/presenter', () => {
       primaryPath: 'data',
     }
 
-    const fields = projectDetailFields({ id: 'abc', ownerEmail: 'owner@example.com' }, presenter, false)
+    const fields = projectDetailFields(
+      { id: 'abc', ownerEmail: 'owner@example.com' },
+      presenter,
+      false,
+    )
 
     expect(fields).toEqual([
       { label: 'id', value: 'abc' },
       { label: 'owner', value: 'owner@example.com' },
     ])
 
-    const wideFields = projectDetailFields({ id: 'abc', ownerEmail: 'owner@example.com' }, presenter, true)
+    const wideFields = projectDetailFields(
+      { id: 'abc', ownerEmail: 'owner@example.com' },
+      presenter,
+      true,
+    )
 
     expect(wideFields[2]).toEqual({ label: 'hidden', value: '-' })
   })
